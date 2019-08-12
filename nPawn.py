@@ -115,7 +115,7 @@ class nPawnGame():
 			for col in range(colNum):
 				print(chr(col%26+97),end="|")
 			print("  ")
-			print("-"*(colNum*2-1)+"+--")
+			print("-+"*colNum+"--")
 
 			for row in range(rowNum)[::-1]:
 				for col in range(colNum): 
@@ -125,7 +125,7 @@ class nPawnGame():
 					else:
 						print(" ", end="|")
 				print(str(row+1))
-				print("-"*(colNum*2-1)+"+--")
+				print("-+"*colNum+"--")
 
 	def isInBounds(self, pos):
 		x, y = pos
