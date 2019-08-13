@@ -5,6 +5,3 @@ __pycache__/
 
 # Jupyter Notebook
 .ipynb_checkpoints
-
-# testing notebook
-test.ipynb
