@@ -17,6 +17,10 @@ class ShogiPiece(Piece):
 
 class King(ShogiPiece):
     def legalMoves(self, pos, game, *args, **kargs):
+        if not ("guard" in kargs):
+            guard = False
+        else:
+            guard = kargs["guard"]
         color = self.color
         x, y = pos
         board = game.board
@@ -28,14 +32,23 @@ class King(ShogiPiece):
                 if dx == 0 and dy == 0:
                     continue
                 end = xx, yy = x+dx, y+dy
-                if self.noConflict(end, game, color):
-                    capture = not(game.board.get(end) is None)
-                    moves.append(Move(self,pos, end, capture=capture))
+                if self.noConflict(end, game, color) or guard:
+                    p = game.board.get(end)
+                    capture = not(p is None)
+                    if color == game.currentColor:
+                        if not game.isAttacked(end,guard=True):
+                            moves.append(Move(self,pos, end, capture=capture))
+                    else:
+                        moves.append(Move(self,pos, end, capture=capture))
 
         return moves
 
 class Pawn(ShogiPiece):
     def legalMoves(self, pos, game, *args, **kargs):
+        if not ("guard" in kargs):
+            guard = False
+        else:
+            guard = kargs["guard"]
         color = self.color
         x, y = pos
         board = game.board
@@ -43,7 +56,7 @@ class Pawn(ShogiPiece):
 
         moves = []
         end = xx, yy = x, y+direction
-        if self.noConflict(end, game, color):
+        if self.noConflict(end, game, color) or guard:
             capture = not(game.board.get(end) is None)
             moves.append(Move(self,pos, end, capture=capture))
             moves.append(Move(self,pos, end, capture=capture, promote=True))
@@ -52,6 +65,10 @@ class Pawn(ShogiPiece):
 
 class Rook(ShogiPiece):
     def legalMoves(self, pos, game, *args, **kargs):
+        if not ("guard" in kargs):
+            guard = False
+        else:
+            guard = kargs["guard"]
         color = self.color
         x, y = pos
         board = game.board
@@ -60,16 +77,23 @@ class Rook(ShogiPiece):
         moves = []
         for dd in [(0,1),(1,0),(0,-1),(-1,0)]:
             end = posAdd(pos,dd)
-            while self.noConflict(end, game, color):
+            while (end not in game.board) and (game.isInBounds(end)):
+                moves.append(Move(self,pos, end))
+                moves.append(Move(self,pos, end, promote=True))
+                end = posAdd(end,dd)
+            if self.noConflict(end, game, color) or guard:
                 capture = not(game.board.get(end) is None)
                 moves.append(Move(self,pos, end, capture=capture))
                 moves.append(Move(self,pos, end, capture=capture, promote=True))
-                end = posAdd(end,dd)
 
         return moves
 
 class Silver(ShogiPiece):
     def legalMoves(self, pos, game, *args, **kargs):
+        if not ("guard" in kargs):
+            guard = False
+        else:
+            guard = kargs["guard"]
         color = self.color
         x, y = pos
         board = game.board
@@ -78,7 +102,7 @@ class Silver(ShogiPiece):
         moves = []
         for dd in [(1,1),(0,1),(-1,1),(1,-1),(-1,-1)]:
             end = posAdd(pos,posMult(dd,direction))
-            if self.noConflict(end, game, color):
+            if self.noConflict(end, game, color) or guard:
                 capture = not(game.board.get(end) is None)
                 moves.append(Move(self,pos, end, capture=capture))
                 moves.append(Move(self,pos, end, capture=capture, promote=True))
@@ -87,6 +111,10 @@ class Silver(ShogiPiece):
 
 class Bishop(ShogiPiece):
     def legalMoves(self, pos, game, *args, **kargs):
+        if not ("guard" in kargs):
+            guard = False
+        else:
+            guard = kargs["guard"]
         color = self.color
         x, y = pos
         board = game.board
@@ -95,16 +123,23 @@ class Bishop(ShogiPiece):
         moves = []
         for dd in [(1,1),(1,-1),(-1,-1),(-1,1)]:
             end = posAdd(pos,dd)
-            while self.noConflict(end, game, color):
+            while (end not in game.board) and (game.isInBounds(end)):
+                moves.append(Move(self,pos, end))
+                moves.append(Move(self,pos, end, promote=True))
+                end = posAdd(end,dd)
+            if self.noConflict(end, game, color) or guard:
                 capture = not(game.board.get(end) is None)
                 moves.append(Move(self,pos, end, capture=capture))
                 moves.append(Move(self,pos, end, capture=capture, promote=True))
-                end = posAdd(end,dd)
 
         return moves
 
 class Gold(ShogiPiece):
     def legalMoves(self, pos, game, *args, **kargs):
+        if not ("guard" in kargs):
+            guard = False
+        else:
+            guard = kargs["guard"]
         color = self.color
         x, y = pos
         board = game.board
@@ -113,7 +148,7 @@ class Gold(ShogiPiece):
         moves = []
         for dd in [(1,1),(0,1),(-1,1),(1,0),(-1,0),(0,-1)]:
             end = posAdd(pos,posMult(dd,direction))
-            if self.noConflict(end, game, color):
+            if self.noConflict(end, game, color) or guard:
                 capture = not(game.board.get(end) is None)
                 moves.append(Move(self,pos, end, capture=capture))
                 moves.append(Move(self,pos, end, capture=capture, promote=True))
@@ -122,6 +157,10 @@ class Gold(ShogiPiece):
 
 class Knight(ShogiPiece):
     def legalMoves(self, pos, game, *args, **kargs):
+        if not ("guard" in kargs):
+            guard = False
+        else:
+            guard = kargs["guard"]
         color = self.color
         x, y = pos
         board = game.board
@@ -130,7 +169,7 @@ class Knight(ShogiPiece):
         moves = []
         for dd in [(1,2),(-1,2)]:
             end = posAdd(pos,posMult(dd,direction))
-            if self.noConflict(end, game, color):
+            if self.noConflict(end, game, color) or guard:
                 capture = not(game.board.get(end) is None)
                 moves.append(Move(self,pos, end, capture=capture))
                 moves.append(Move(self,pos, end, capture=capture, promote=True))
@@ -139,6 +178,10 @@ class Knight(ShogiPiece):
 
 class Lance(ShogiPiece):
     def legalMoves(self, pos, game, *args, **kargs):
+        if not ("guard" in kargs):
+            guard = False
+        else:
+            guard = kargs["guard"]
         color = self.color
         x, y = pos
         board = game.board
@@ -146,16 +189,23 @@ class Lance(ShogiPiece):
 
         moves = []
         end = posAdd(pos,(0,direction))
-        while self.noConflict(end, game, color):
+        while (end not in game.board) and (game.isInBounds(end)):
+            moves.append(Move(self,pos, end))
+            moves.append(Move(self,pos, end, promote=True))
+            end = posAdd(end,dd)
+        if self.noConflict(end, game, color) or guard:
             capture = not(game.board.get(end) is None)
             moves.append(Move(self,pos, end, capture=capture))
             moves.append(Move(self,pos, end, capture=capture, promote=True))
-            end = posAdd(end,(0,direction))
 
         return moves
 
 class Tokin(ShogiPiece):
     def legalMoves(self, pos, game, *args, **kargs):
+        if not ("guard" in kargs):
+            guard = False
+        else:
+            guard = kargs["guard"]
         color = self.color
         x, y = pos
         board = game.board
@@ -164,7 +214,7 @@ class Tokin(ShogiPiece):
         moves = []
         for dd in [(1,1),(0,1),(-1,1),(1,0),(-1,0),(0,-1)]:
             end = posAdd(pos,posMult(dd,direction))
-            if self.noConflict(end, game, color):
+            if self.noConflict(end, game, color) or guard:
                 capture = not(game.board.get(end) is None)
                 moves.append(Move(self,pos, end, capture=capture))
                 moves.append(Move(self,pos, end, capture=capture, promote=True))
@@ -189,11 +239,11 @@ PIECE_NAME = {King  : "King"  ,
               Gold  : "Gold"  , Knight: "Knight",
               Pawn  : "Pawn"  , Rook  : "Rook"  }
 
-PIECE_SYMBOLS_KANJI = {King  : "玉", 
-                       Tokin : "と", Lance : "香",
-                       Silver: "銀", Bishop: "角",
-                       Gold  : "金", Knight: "桂",
-                       Pawn  : "歩", Rook  : "飛"}
+PIECE_SYMBOL_KANJI = {King  : "玉", 
+                      Tokin : "と", Lance : "香",
+                      Silver: "銀", Bishop: "角",
+                      Gold  : "金", Knight: "桂",
+                      Pawn  : "歩", Rook  : "飛"}
 
 class Move(BaseMove):
     def __init__(self, piece, start, end, capture=False, promote=False, drop=False):
@@ -222,7 +272,7 @@ class Move(BaseMove):
             seperater = "*"
             promote = ""
 
-            return pieceName+start+seperater+end+promote
+            return pieceName+seperater+end+promote
 
     def __repr__(self):
         return "Move({})".format(repr(self.longAlgebraicNotation()))
@@ -265,6 +315,8 @@ class kyotoShogiGame():
                     item = self.board.get((col,row),".")
                     print(" "+str(item), end="")
                 print("|"+str(row+1))
+            print("B: "+str(self.captured[BLACK]))
+            print("W: "+str(self.captured[WHITE]))
 
     def isInBounds(self, pos):
         x, y = pos
@@ -275,27 +327,108 @@ class kyotoShogiGame():
     def legalMoves(self, color=None):
         if color is None:
             color = self.currentColor
+        rowNum, colNum = self.size
 
         moves = []
-        for pos in self.board:
-            piece = self.board[pos]
-            if piece.color == color:
-                moves += piece.legalMoves(pos, self)
+        if not self.isChecked():
+            for pos in self.board:
+                piece = self.board[pos]
+                if piece.color == color:
+                    pMoves = piece.legalMoves(pos, self)
+                    moves += pMoves
+            for index,piece in enumerate(self.captured[self.currentColor]):
+                for y in range(rowNum):
+                    for x in range(colNum):
+                        target = (x,y)
+                        if target not in self.board:
+                            moves.append(Move(piece,index,target,drop=True))
+        else:
+            attackers = self.checkedBy()
+            for pos in self.board:
+                piece = self.board[pos]
+                if piece.color == color:
+                    if type(piece) == King:
+                        pMoves = piece.legalMoves(pos, self)
+                        moves += pMoves
+                    else:
+                        pMoves = piece.legalMoves(pos, self)
+                        for m in pMoves:
+                            after = self.peek(m, moveCheck = False)
+                            after.currentColor = self.currentColor
+                            if not after.isChecked():
+                                moves.append(m)
+            for index,piece in enumerate(self.captured[self.currentColor]):
+                for y in range(rowNum):
+                    for x in range(colNum):
+                        target = (x,y)
+                        if target not in self.board:
+                            m = Move(piece,index,target,drop=True)
+                            after = self.peek(m, moveCheck = False)
+                            after.currentColor = self.currentColor
+                            if not after.isChecked():
+                                moves.append(m)
         return moves
 
-    def isAttacked(self, pos, color=None):
+    def isAttacked(self, target, color=None, guard=False):
         if color is None:
-            color = self.otherColor(self.currentColor)
+            color = self.currentColor
+        other = self.otherColor(color)
+        tester = copy.deepcopy(self)
+        tester.board[target] = Pawn(color, Pawn)
 
-        for pos in self.board:
-            piece = self.board[pos]
-            if piece.color == color:
-                if piece.isValid(pos, self):
+        for pos in tester.board:
+            piece = tester.board[pos]
+            if piece.color == other:
+                move = Move(piece,pos,target)
+                if piece.isValid(move, self, guard=guard):
                     return True
         return False
 
+    def attackedBy(self, target, color=None, guard=False):
+        if color is None:
+            color = self.currentColor
+        other = self.otherColor(color)
+        tester = copy.deepcopy(self)
+        tester.board[target] = Pawn(color, Pawn)
+
+        attackers = {}
+        for pos in tester.board:
+            piece = tester.board[pos]
+            if piece.color == other:
+                move = Move(piece,pos,target)
+                if piece.isValid(move, self, guard=guard):
+                    attackers[pos] = piece
+        return attackers
+
+    def attackedCells(self, color=None):
+        rowNum, colNum = self.size
+
+        cells = []
+        for y in range(rowNum):
+            for x in range(colNum):
+                if self.isAttacked((x,y), color=color):
+                    cells.append((x,y))
+        return cells
+
     def isValid(self, move):
         return move in self.legalMoves()
+
+    def isChecked(self):
+    	for pos in self.board:
+    		piece = self.board[pos]
+    		if type(piece) == King and piece.color == self.currentColor:
+    			return self.isAttacked(pos)
+    	return False
+
+    def checkedBy(self):
+        for pos in self.board:
+            piece = self.board[pos]
+            if type(piece) == King and piece.color == self.currentColor:
+                return self.attackedBy(pos)
+        return False
+
+    def isCheckmate(self):
+        return (self.isChecked() and not self.legalMoves())
 
     def otherColor(self,color=None):
         if color == WHITE:
@@ -304,35 +437,43 @@ class kyotoShogiGame():
             return WHITE
         return None
 
-    def play(self, move): 
-        if not self.isValid(move):
-            return False
+    def play(self, move, moveCheck = True): 
+        if moveCheck:
+            if not self.isValid(move):
+                return False
 
         start = move.start 
         end = move.end
 
-        piece = self.board.pop(start)
-        if move.capture:
-            captured = self.board[end].original
-            self.captured[self.currentColor].append(
-                    captured(self.currentColor, captured))
+        if not move.drop:
+            piece = self.board.pop(start)
+            if move.capture:
+                captured = self.board[end].original
+                self.captured[self.currentColor].append(
+                        captured(self.currentColor, captured))
 
-        if move.promote:
-            pieceType = type(piece)
-            promoted = PIECE_PROMOTE[pieceType]
-            piece = promoted(piece.color, pieceType)
-        self.board[end] = piece
+            if move.promote:
+                pieceType = type(piece)
+                promoted = PIECE_PROMOTE[pieceType]
+                piece = promoted(piece.color, pieceType)
 
-        self.currentColor == self.otherColor(self.currentColor)
+            self.board[end] = piece
 
-        return True
+            self.currentColor == self.otherColor(self.currentColor)
 
-    def peek(self, move):
+            return True
+        else:
+            piece = self.captured[self.currentColor].pop(start)
+            self.board[end] = piece
+
+            self.currentColor == self.otherColor(self.currentColor)
+
+            return True
+
+    def peek(self, move, moveCheck = True):
         game = copy.deepcopy(self)
-        if not game.isValid(move):
+        if not game.play(move, moveCheck):
             return None
-
-        game.play(move)
         return game
 
     def winner(self):

@@ -29,8 +29,9 @@ class Piece():
         else:
             return self._legalMoves(game, *args, **kargs)
 
-    def isValid(self, pos, game, *args, **kargs):
-        return pos in self.legalMoves(self, game, *args, **kargs)
+    def isValid(self, move, game, *args, **kargs):
+        pos = move.start
+        return move in self.legalMoves(pos, game, *args, **kargs)
 
     def __eq__(self, that):
         return ( self.name == that.name
