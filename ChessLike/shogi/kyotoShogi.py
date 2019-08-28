@@ -192,7 +192,7 @@ class Lance(ShogiPiece):
         while (end not in game.board) and (game.isInBounds(end)):
             moves.append(Move(self,pos, end))
             moves.append(Move(self,pos, end, promote=True))
-            end = posAdd(end,dd)
+            end = posAdd(end,(0,direction))
         if self.noConflict(end, game, color) or guard:
             capture = not(game.board.get(end) is None)
             moves.append(Move(self,pos, end, capture=capture))
@@ -311,10 +311,24 @@ class kyotoShogiGame():
             print("--"*colNum)
 
             for row in range(rowNum):
-                for col in range(colNum)[::-1]: 
+                for col in range(colNum)[::-1]:
                     item = self.board.get((col,row),".")
                     print(" "+str(item), end="")
                 print("|"+str(row+1))
+            print("B: "+str(self.captured[BLACK]))
+            print("W: "+str(self.captured[WHITE]))
+        elif style == "kanji":
+            for row in range(rowNum):
+                for col in range(colNum)[::-1]:
+                    item = self.board.get((col,row))
+                    kanji = PIECE_SYMBOL_KANJI.get(type(item),"・")
+                    if not (item is None):
+                        direction = "^" if item.color == WHITE else "v"
+                    else:
+                        direction = " "
+                    print(direction+kanji+" ", end="")
+                # print("|"+str(row+1))
+                print()
             print("B: "+str(self.captured[BLACK]))
             print("W: "+str(self.captured[WHITE]))
 
@@ -458,17 +472,11 @@ class kyotoShogiGame():
                 piece = promoted(piece.color, pieceType)
 
             self.board[end] = piece
-
-            self.currentColor == self.otherColor(self.currentColor)
-
-            return True
         else:
             piece = self.captured[self.currentColor].pop(start)
             self.board[end] = piece
-
-            self.currentColor == self.otherColor(self.currentColor)
-
-            return True
+        self.currentColor = self.otherColor(self.currentColor)
+        return True
 
     def peek(self, move, moveCheck = True):
         game = copy.deepcopy(self)
